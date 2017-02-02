@@ -1,0 +1,81 @@
+module EvalExpr where
+
+import Data.Char
+
+{-isValidOperand :: String -> Bool
+isValidOperand [] = False
+isValidOperand xs = all isDigit xs-}
+
+isValidOperand :: String -> Bool
+isValidOperand (c:rest) | isNumber c =
+  isNumber' rest
+  where
+    isNumber' "" = True
+    isNumber' (c:rest) | isNumber c = isNumber' rest
+    isNumber' (c:rest) = False
+isValidOperand (c:rest) | isAlphaNum c =
+  isAlphaNumber' rest
+  where
+    isAlphaNumber' "" = True
+    isAlphaNumber' (c:rest) | isAlphaNum c = isAlphaNumber' rest
+    isAlphaNumber' (c:rest) = False
+isValidOperand op = False
+
+isValidBinaryOperator :: String -> Bool
+isValidBinaryOperator x
+	| x == "+" = True
+	| x == "*" = True
+	| x == "/" = True
+	| x == "^" = True
+	| x == "^^" = True
+	| x == "**" = True
+	| otherwise = False
+
+isValidUnaryOperator :: String -> Bool
+isValidUnaryOperator x
+	| x == "-" = True
+	| otherwise = False
+
+checkExpression :: [String] -> (Bool, [String])
+checkExpression (x:xs)
+	| isValidOperand x = (True, xs)
+checkExpression ("(":x:xs)
+	| isValidBinaryOperator x =
+		let (val, xs') = checkExpression xs
+		    (val2, xs'') = checkExpression xs' in
+		    if head xs'' == ")" then 
+			(True, tail xs'')
+		    else
+			(False, xs'')
+	| isValidUnaryOperator x =
+		let (val, xs') = checkExpression xs in
+	  	    if head xs' == ")" then
+			(True, tail xs')
+		    else
+			(False, xs')
+checkExpression xs = (False, xs)
+
+{-getBinaryOperator :: String -> Maybe (Integer->Integer->Integer)
+getBinaryOperator x
+        | x == "+" = Just (+)
+        | otherwise = Nothing
+
+getUnaryOperator :: String -> Maybe (Integer->Integer)
+getUnaryOperator x 
+        | x == "-" = Just (\x -> -x)
+        | otherwise = Nothing
+
+compute :: [String] -> Integer
+compute xs
+        | (val,[]) <- computeInt xs = val
+        
+computeInt :: [String] -> (Integer, [String])
+computeInt (x:xs) 
+        | isValidOperand x = (read x :: Integer, xs) 
+	| Just op <- getBinaryOperator x = 
+	        let (val, xs') = computeInt xs
+	            (val2, xs'') = computeInt xs' in
+	            (op val val2,xs'')
+        | Just op <- getUnaryOperator x =
+                let (val, xs') = computeInt xs in
+                    (op val, xs')-}

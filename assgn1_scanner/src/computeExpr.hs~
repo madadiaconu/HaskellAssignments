@@ -1,0 +1,44 @@
+module Compute where
+
+import Data.Char
+
+isValidOperand :: String -> Bool
+isValidOperand [] = False
+isValidOperand xs = all isDigit xs
+
+getBinaryOperator :: String -> Maybe (Integer->Integer->Integer)
+getBinaryOperator x
+        | x == "+" = Just (+)
+        | otherwise = Nothing
+
+getUnaryOperator :: String -> Maybe (Integer->Integer)
+getUnaryOperator x 
+        | x == "-" = Just (\x -> -x)
+        | otherwise = Nothing
+
+computeOperation :: [String] -> (Integer, [String])
+computeOperation (x:xs)
+        | Just op <- getBinaryOperator x = 
+	        let (val, xs') = computeInt xs
+	            (val2, xs'') = computeInt xs' in
+                    if head xs'' == ")" then
+	                 (op val val2, tail xs'')
+        | Just op <- getUnaryOperator x =
+                let (val, xs') = computeInt xs in
+                    if head xs' == ")" then                    
+                        (op val, tail xs') 
+
+compute :: [String] -> Integer
+compute xs
+        | (val,[]) <- computeInt xs = val
+        
+computeInt :: [String] -> (Integer, [String])
+computeInt (x:xs) 
+        | isValidOperand x = (read x :: Integer, xs) 
+	| Just op <- getBinaryOperator x = 
+	        let (val, xs') = computeInt xs
+	            (val2, xs'') = computeInt xs' in
+	            (op val val2,xs'')
+        | Just op <- getUnaryOperator x =
+                let (val, xs') = computeInt xs in
+                    (op val, xs')
